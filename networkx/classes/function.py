@@ -15,7 +15,7 @@ __all__ = ['nodes', 'edges', 'degree', 'degree_histogram', 'neighbors',
            'subgraph', 'subgraph_view', 'induced_subgraph', 'reverse_view',
            'edge_subgraph', 'restricted_view',
            'to_directed', 'to_undirected',
-           'add_star', 'add_path', 'add_cycle',
+           'add_self_loops', 'add_star', 'add_path', 'add_cycle',
            'create_empty_copy', 'set_node_attributes',
            'get_node_attributes', 'set_edge_attributes',
            'get_edge_attributes', 'all_neighbors', 'non_neighbors',
@@ -196,6 +196,30 @@ def is_frozen(G):
     except AttributeError:
         return False
 
+def add_self_loops(G_to_add_to,  **attr):
+    """Adds self edges to all nodes that do not already have one.
+
+    Each self edge is an edge going from a node to itself.
+
+    Parameters
+    ----------
+    G_to_add_to : graph
+        A NetworkX graph
+    attr : keyword arguments, optional (default= no attributes)
+        Attributes to add to every new self edge.
+
+    Examples
+    --------
+    >>> G = nx.Graph()
+    >>> G.add_edges_from([(1,2), (1,1)])
+    >>> nx.add_self_loops(G, new_self_edge=True)
+    >>> G.edges(data=True)
+    EdgeDataView([(1, 2, {}), (1, 1, {}), (2, 2, {'new_self_edge': True})])
+
+    """
+    edges = ((n, n) for n in G_to_add_to.nodes()
+             if (n, n) not in G_to_add_to.edges())
+    G_to_add_to.add_edges_from(edges, **attr)
 
 def add_star(G_to_add_to, nodes_for_star, **attr):
     """Add a star to Graph G_to_add_to.
@@ -526,7 +550,7 @@ def create_empty_copy(G, with_data=True):
 
 def info(G, n=None):
     """Return a summary of information for the graph G or a single node n.
- 
+
     The summary includes the number of nodes and edges (or neighbours for a single
     node), and their average degree.
 
